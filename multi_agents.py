@@ -52,7 +52,7 @@ class ReflexAgent(Agent):
         board = successor_game_state.board
         max_tile = successor_game_state.max_tile
         score = successor_game_state.score
-        "*** YOUR CODE HERE ***"
+
 
         return score + 100*largest_tiles_in_upper_row(board) + count_merges(board)
 
@@ -268,12 +268,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         The opponent should be modeled as choosing uniformly at random from their
         legal moves.
         """
-        """*** YOUR CODE HERE ***"""
-        #util.raiseNotDefined()
-
-        # todo have to take the average of the possible moves assuming all of them are equally possible. This means
-        #  we do a variety of recursive calls until the recursion backtracks and then we take the average of
-        #  everything we got.
 
         v = -math.inf
         max_action = Action.STOP
@@ -323,9 +317,9 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
 def count_merges(board):
     """
-    count the number of available merges
-    :param board:
-    :return: the number of merges
+    calculates the value of all the available merges on the board
+    :param board: an array whose merges we want to count.
+    :return: the value of the avialable merges
     """
 
     merge_val = 0
@@ -349,14 +343,14 @@ def count_merges(board):
 
 def monotonicity(board):
     """
-    checks if the rows and columns are ordered monotonically.
+    checks if the rows are ordered monotonically, from rght to left or from left to right. Or if the columns are
+    ordered monotonically up and down or down and up.
     :param board: the current state of the board
-    :return: how many rows and columns are monotonically ordered
+    :return: the maximum number of rows or columns which are monotonically ordered, but not both or -1 if nothing is
+    monotonically ordered.
     """
 
-    # todo how do we rank a lack of monotonicity between 2's and 4's
-    # check if the rows are monotonic from left to right
-
+    #row monotonicity
 
     left_right_monotinicity = 4
     for row in range(4):
@@ -403,6 +397,11 @@ def monotonicity(board):
 
 
 def tile_placement_ranking(current_game_state):
+    """
+    checks to see if the largest value is in one of the corners.
+    :param current_game_state: the instance of the game state we want to analyze
+    :return: 1 if the largest value is in a corner or -1 if it is not.
+    """
     max_tile = current_game_state.max_tile
     board = current_game_state.board
 
@@ -422,7 +421,7 @@ def tile_placement_ranking(current_game_state):
 
 def smoothness_score(board):
     """
-    attempts to rank a board by the sum of the absolute differences between neighboring tiles.
+    Ranks a board by the sum of the absolute differences between neighboring tiles.
     :param board: the current game board
     :return: return a number indicating the ranking of the smoothness of the board
     """
@@ -441,7 +440,13 @@ def smoothness_score(board):
     return -smoothness
 
 def center_of_the_board(board):
-
+    """
+    ranks a board based on whether or not particularly large values are being held in the center. A state which is
+    usually fairly problematic.
+    :param board: a 4*4 array out of whose center we want to keep the larger values
+    :return: the total penalty for having particularly large values in the center or 0 if there are no violations of
+    this policy.
+    """
     center_coordinates = [(1,1), (1,2), (2,1), (2,2)]
     center_values = [board[index[0], index[1]] for index in center_coordinates]
 
@@ -459,13 +464,29 @@ def better_evaluation_function(current_game_state):
     """
     Your extreme 2048 evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: the evaluation calculates a variety of properties and adds them together in a weighted sum.
+    merge score - the value of all the merges on the board. This gives weight to boards with more merges, the higher
+    value the possible merges the better.
+
+    empty squares - the number of empty squares, this is important so the algorithm doesnt favor boards that are too
+    full and thereby get stuck.
+
+    monotonicity - how monotonic the rows are from left to right or right to left or how monotonic the columns are
+    going up and down or down and up. This means the evaluation function favors boards that are monotonic,
+    which is a good strategy to play by.
+
+    Smoothness - smoothness is a measure of the difference between neighboring tiles. The less smooth, the greater
+    the differences between neighboring tiles the more points are deducted from the board.
+
+    center_score - placing high valued tiles in the center of the board seems to generally be a cause of problems,
+    it seems best to keep high valued tiles near to the edges.
+
+    placement_score - an excellent strategy for winnning the game is to keep the highest valued tile in a corner,
+    this allows the monotonicity to be fairly consistent and forces a certain organization on the tiles and the
+    possible merges. So if the largest value is in one of the corners there is a bonus and if not points are deducted.
+
+    All this is added together with weights chosen by instinct and alot of tinkering.
     """
-    "*** YOUR CODE HERE ***"
-    # todo we will use the score and attempt to get the eval to favor monotonic rows and columns, then we will use
-    #  the smoothness heuristic. We have to find a ranking strategy which will adjust as the game goes on? I thing I
-    #  will start with attempting to count the number of possible merges
-    #util.raiseNotDefined()
 
     board = current_game_state.board
     merge_score = count_merges(board)
