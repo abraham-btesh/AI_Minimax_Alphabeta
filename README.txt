@@ -1,6 +1,5 @@
-777539958
-*****
-Comments:
+This project implements Minimax, Expectimax and Alphabeta.
+
 Minimax, Alphabeta and Expectimax are implemented recursively as per the pseudocode.
 the evaluation function is implemented with an attempt to get the successor to abide by a certain strategy, keeping the
 largest tiles in the top row and valuing the highest value merges available.
